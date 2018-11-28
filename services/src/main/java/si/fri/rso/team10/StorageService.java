@@ -19,7 +19,7 @@ public class StorageService {
         var listen = new ListenInstance(id);
         try {
             var httpClientListen = HttpClient.newBuilder().build();
-            var httpRequestListen = HttpRequest.newBuilder(URI.create("http://172.17.0.1:8082/v1/listen")).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(listen))).build();
+            var httpRequestListen = HttpRequest.newBuilder(URI.create("http://stats:8082/v1/listen")).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(listen))).build();
             var httpResponse = httpClientListen.send(httpRequestListen, HttpResponse.BodyHandlers.ofString());
             if (httpResponse.statusCode() != 200) {
                 System.out.println("Listen stat failed");
@@ -38,7 +38,7 @@ public class StorageService {
 
         var httpClient = HttpClient.newBuilder().build();
         //var httpRequest = HttpRequest.newBuilder(statsService.getUriBuilder().path("/v1/listen/most").build()).build();
-        var httpRequest = HttpRequest.newBuilder(URI.create("http://172.17.0.1:8081/v1/tracks/activate/" + id)).POST(HttpRequest.BodyPublishers.noBody()).build();
+        var httpRequest = HttpRequest.newBuilder(URI.create("http://catalogues:8081/v1/tracks/activate/" + id)).POST(HttpRequest.BodyPublishers.noBody()).build();
         try {
             var httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             if (httpResponse.statusCode() != 200) {
@@ -55,7 +55,7 @@ public class StorageService {
         var uploadDate = new UploadDate(id);
         try {
             var httpClientUpload = HttpClient.newBuilder().build();
-            var httpRequestUpload = HttpRequest.newBuilder(URI.create("http://172.17.0.1:8082/v1/upload")).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(uploadDate))).build();
+            var httpRequestUpload = HttpRequest.newBuilder(URI.create("http://stats:8082/v1/upload")).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(uploadDate))).build();
             var httpResponse = httpClientUpload.send(httpRequestUpload, HttpResponse.BodyHandlers.ofString());
             if (httpResponse.statusCode() != 200) {
                 System.out.println("Upload stat failed");
