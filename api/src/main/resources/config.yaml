@@ -7,8 +7,15 @@ kumuluzee:
     base-url: http://172.17.0.1:8083
     http:
       port: 8083
+  config:
+    start-retry-delay-ms: 500
+    max-retry-delay-ms: 900000
+    etcd:
+      hosts: http://etcd-client:2379
   discovery:
     etcd:
       hosts: http://172.17.0.1:2379
     ttl: 20
     ping-interval: 15
+config-bundle:
+  access-token: default
