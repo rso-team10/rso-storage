@@ -1,19 +1,80 @@
 package si.fri.rso.team10;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.auth.Credentials;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.OAuth2Credentials;
+import com.google.cloud.storage.*;
+import si.fri.rso.team10.configuration.ConfigurationProperties;
 import si.fri.rso.team10.dto.ListenInstance;
 import si.fri.rso.team10.dto.UploadDate;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 @RequestScoped
 public class StorageService {
+    private static final String KEY = "ya29.GluPBgrMzFTPHfuKVMAUdL0zNdsBEB6BpbyebBTfLIv9ZCkc6k_4EbH4P5vCNygN08kskzD7ZFIB_iBZTx2yjYpOzkWtsrxmFKv1uxiaYNtIoWo0tAJUgRRZVQIX";
+    private static final String BUCKET_NAME = "rso-bucket";
+    private static final String FILE_PREFIX = "music/track-";
+    private static final String FILE_SUFFIX = ".mp3";
+
+    @Inject
+    private ConfigurationProperties configProps;
+
+    public boolean uploadFile(Long id, File file) {
+        var storageService = getStorageOptions().getService();
+        var fileName = FILE_PREFIX + id + FILE_SUFFIX;
+
+        var blobId = BlobId.of(BUCKET_NAME, fileName);
+        var blobInfo = BlobInfo.newBuilder(blobId).setAcl(Arrays.asList(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER))).build();
+
+        try {
+            storageService.create(blobInfo, Files.readAllBytes(file.toPath()));
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public String getFileUrl(Long id) {
+        var storageService = getStorageOptions().getService();
+        var fileName = FILE_PREFIX + id + FILE_SUFFIX;
+
+        try {
+            var blob = storageService.get(BlobId.of(BUCKET_NAME, fileName));
+
+            return blob == null ? null : blob.getMediaLink();
+        } catch (StorageException e) {
+            // token error probably
+            e.printStackTrace();
+
+            return "Token is probably fucked: " + configProps.getAccessToken();
+        }
+    }
+
+    private StorageOptions getStorageOptions() {
+        return StorageOptions.newBuilder().setCredentials(GoogleCredentials.create(new AccessToken(configProps.getAccessToken(), null))).build();
+    }
 
     public boolean recordStream(Long id) {
         var listen = new ListenInstance(id);

@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
 
 @RequestScoped
 @Consumes(MediaType.APPLICATION_JSON)
@@ -18,15 +19,14 @@ public class StorageResource {
     @GET
     @Path("{trackId}")
     public Response streamSong(@PathParam("trackId") String trackId) {
-        // TODO actually stream song
-
         try {
-            var success = storageService.recordStream(Long.valueOf(trackId));
-            if (success) {
-                return Response.ok().build();
-            } else {
+            var mediaLink = storageService.getFileUrl(Long.valueOf(trackId));
+            if (mediaLink == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
+
+            storageService.recordStream(Long.valueOf(trackId));
+            return Response.ok(mediaLink).build();
         } catch (NumberFormatException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -34,10 +34,14 @@ public class StorageResource {
 
     @POST
     @Path("{trackId}")
-    public Response uploadSong(@PathParam("trackId") String trackId) {
-        // TODO actually upload song
-
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response uploadSong(@PathParam("trackId") String trackId, File file) {
         try {
+            var uploadSuccessful = storageService.uploadFile(Long.valueOf(trackId), file);
+            if (!uploadSuccessful) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+
             var success = storageService.activateSong(Long.valueOf(trackId));
             if (success) {
                 return Response.ok().build();
