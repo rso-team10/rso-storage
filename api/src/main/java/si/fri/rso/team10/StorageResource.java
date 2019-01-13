@@ -37,6 +37,8 @@ public class StorageResource {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
+            storageService.recordStream(Long.valueOf(trackId));
+
             counter.inc();
             meter.mark();
 
