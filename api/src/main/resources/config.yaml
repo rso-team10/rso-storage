@@ -12,6 +12,10 @@ kumuluzee:
     max-retry-delay-ms: 900000
     etcd:
       hosts: http://etcd-client:2379
+  metrics:
+    web-instrumentation:
+      - name: metricsEndpoint
+        url-pattern: /metrics/*
   discovery:
     etcd:
       hosts: http://172.17.0.1:2379

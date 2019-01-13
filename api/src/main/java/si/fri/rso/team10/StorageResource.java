@@ -1,5 +1,9 @@
 package si.fri.rso.team10;
 
+import org.eclipse.microprofile.metrics.Counter;
+import org.eclipse.microprofile.metrics.Meter;
+import org.eclipse.microprofile.metrics.annotation.Metric;
+
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -16,6 +20,14 @@ public class StorageResource {
     @Inject
     private StorageService storageService;
 
+    @Inject
+    @Metric(name = "stream-counter")
+    private Counter counter;
+
+    @Inject
+    @Metric(name = "stream-frequency")
+    private Meter meter;
+
     @GET
     @Path("{trackId}")
     public Response streamSong(@PathParam("trackId") String trackId) {
@@ -25,7 +37,9 @@ public class StorageResource {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            storageService.recordStream(Long.valueOf(trackId));
+            counter.inc();
+            meter.mark();
+
             return Response.ok(mediaLink).build();
         } catch (NumberFormatException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
