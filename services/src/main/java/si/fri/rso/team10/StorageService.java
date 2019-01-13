@@ -1,10 +1,6 @@
 package si.fri.rso.team10;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.auth.Credentials;
-import com.google.auth.oauth2.AccessToken;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.storage.*;
 import si.fri.rso.team10.configuration.ConfigurationProperties;
 import si.fri.rso.team10.dto.ListenInstance;
@@ -19,14 +15,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 
 @RequestScoped
 public class StorageService {
@@ -39,7 +28,7 @@ public class StorageService {
     private ConfigurationProperties configProps;
 
     public boolean uploadFile(Long id, File file) {
-        var storageService = getStorageOptions().getService();
+        var storageService = getStorageInstance();
         var fileName = FILE_PREFIX + id + FILE_SUFFIX;
 
         var blobId = BlobId.of(BUCKET_NAME, fileName);
@@ -57,7 +46,7 @@ public class StorageService {
     }
 
     public String getFileUrl(Long id) {
-        var storageService = getStorageOptions().getService();
+        var storageService = getStorageInstance();
         var fileName = FILE_PREFIX + id + FILE_SUFFIX;
 
         try {
@@ -68,12 +57,13 @@ public class StorageService {
             // token error probably
             e.printStackTrace();
 
-            return "Token is probably fucked: " + configProps.getAccessToken();
+            return "Permissions be fucked?";
         }
     }
 
-    private StorageOptions getStorageOptions() {
-        return StorageOptions.newBuilder().setCredentials(GoogleCredentials.create(new AccessToken(configProps.getAccessToken(), null))).build();
+    private Storage getStorageInstance() {
+        // GOOGLE_APPLICATION_CREDENTIALS env variable has to be set to a service account with storage permissions
+        return StorageOptions.getDefaultInstance().getService();
     }
 
     public boolean recordStream(Long id) {
