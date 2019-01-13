@@ -62,10 +62,8 @@ public class StorageService {
     }
 
     private Storage getStorageInstance() {
-        // when deployed inside k8s, we can use the default instance which should have the necessary permissions
+        // GOOGLE_APPLICATION_CREDENTIALS env variable has to be set to a service account with storage permissions
         return StorageOptions.getDefaultInstance().getService();
-
-        //return StorageOptions.newBuilder().setCredentials(GoogleCredentials.create(new AccessToken(configProps.getAccessToken(), null))).build();
     }
 
     public boolean recordStream(Long id) {

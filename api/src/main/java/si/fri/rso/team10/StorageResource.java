@@ -39,7 +39,7 @@ public class StorageResource {
         try {
             var uploadSuccessful = storageService.uploadFile(Long.valueOf(trackId), file);
             if (!uploadSuccessful) {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                return Response.status(Response.Status.BAD_REQUEST).build();
             }
 
             var success = storageService.activateSong(Long.valueOf(trackId));
