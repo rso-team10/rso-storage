@@ -42,7 +42,8 @@ public class StorageResource {
             counter.inc();
             meter.mark();
 
-            return Response.ok(mediaLink).build();
+            return Response.ok(mediaLink).header("Access-Control-Allow-Origin", "*")
+                    .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
         } catch (NumberFormatException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
